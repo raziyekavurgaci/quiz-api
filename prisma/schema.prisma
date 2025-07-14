@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  question      String
+  options       String[] // Şıklar dizisi
+  correctAnswer String
+  category      String
+  difficulty    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  answers       Answer[] // Kullanıcı cevapları ile ilişki
+  Score         Score[]
+}
+
+// Kullanıcı cevapları modeli
+model Answer {
+  id             String   @id @default(uuid())
+  questionId     String
+  userId         String
+  selectedOption String
+  isCorrect      Boolean
+  createdAt      DateTime @default(now())
+  question       Question @relation(fields: [questionId], references: [id])
+}
+
+// Skor modeli
+model Score {
+  id         String    @id @default(uuid())
+  userId     String
+  points     Int       @default(0)
+  questionId String?
+  timeSpent  Int? // Saniye cinsinden süre
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  question   Question? @relation(fields: [questionId], references: [id])
+
+  @@index([userId]) // Kullanıcı ID'sine göre hızlı arama için index
+}
