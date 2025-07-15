@@ -14,40 +14,113 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+enum OptionLabel {
+  A
+  B
+  C
+  D
+  E
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  role          Role           @default(STUDENT)
+  quizzes       Quiz[]
+  answer        Answer[]
+  scores        Score[]
+  questionsPool QuestionPool[]
+}
+
+model Quiz {
+  id        String   @id @default(uuid())
+  duration  Int
+  authorId  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  scores   Score[]
+  author   User       @relation(fields: [authorId], references: [id])
+  question Question[]
+}
+
 model Question {
-  id            String   @id @default(uuid())
-  question      String
-  options       String[] // Şıklar dizisi
-  correctAnswer String
-  category      String
-  difficulty    String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  answers       Answer[] // Kullanıcı cevapları ile ilişki
-  Score         Score[]
-}
-
-// Kullanıcı cevapları modeli
-model Answer {
   id             String   @id @default(uuid())
-  questionId     String
-  userId         String
-  selectedOption String
-  isCorrect      Boolean
-  createdAt      DateTime @default(now())
-  question       Question @relation(fields: [questionId], references: [id])
+  quizId         String
+  questionPoolId String
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  quiz         Quiz         @relation(fields: [quizId], references: [id])
+  answer       Answer[]
+  questionPool QuestionPool @relation(fields: [questionPoolId], references: [id])
 }
 
-// Skor modeli
-model Score {
-  id         String    @id @default(uuid())
+model QuestionPool {
+  id           String   @id @default(uuid())
+  authorId     String
+  questionText String
+  points       Int      @default(1)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  author        User        @relation(fields: [authorId], references: [id])
+  options       Option[] // Sorunun seçenekleri
+  correctOption OptionLabel // doğru cevabın tipi (A,B,C,D,E)
+  Question      Question[]
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  questionId String
+  optionText String // Seçeneğin metni
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  question   QuestionPool @relation(fields: [questionId], references: [id])
+  answers    Answer[] // Bu seçeneği seçen cevaplar
+  optionType OptionLabel // Seçeneğin tipi (A,B,C,D,E)
+}
+
+model Answer {
+  id         String   @id @default(uuid())
   userId     String
-  points     Int       @default(0)
-  questionId String?
-  timeSpent  Int? // Saniye cinsinden süre
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  question   Question? @relation(fields: [questionId], references: [id])
+  questionId String // QuizQuestion'a referans
+  optionId   String // Seçilen Option'a referans
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  @@index([userId]) // Kullanıcı ID'sine göre hızlı arama için index
+  user     User     @relation(fields: [userId], references: [id])
+  option   Option   @relation(fields: [optionId], references: [id])
+  Question Question @relation(fields: [questionId], references: [id])
 }
+
+model Score {
+  id                String   @id @default(uuid())
+  userId            String
+  quizId            String
+  points            Int
+  correctQuestionId String[]
+  wrongQuestionId   String[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+  quiz Quiz @relation(fields: [quizId], references: [id])
+}
+
+// önce endpoinleri ayarla
+
+// shared repo decoratorlarını yap
+// guard pipe araştır
+// Generic Repository Pattern in Typescript with NestJS prisma service ve module
