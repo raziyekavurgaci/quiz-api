@@ -1,35 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es2022",
-    "module": "es2022",
-    "moduleResolution": "node",
-    "allowJs": true,
+    "module": "commonjs",
+    "declaration": true,
     "removeComments": true,
-    "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types"],
-    "noImplicitAny": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
     "sourceMap": true,
-    "outDir": "dist",
-    "strict": true,
-    "baseUrl": ".",
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": false,
-    "emitDecoratorMetadata": false,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
     "skipLibCheck": true,
-    "exactOptionalPropertyTypes": false,
-    "strictNullChecks": true
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "moduleDetection": "force",
-      "module": "CommonJS",
-      "resolveJsonModule": true,
-      "allowJs": true,
-      "esModuleInterop": true,
-      "isolatedModules": true
-    }
-  },
-  "include": ["src//*"],
-  "exclude": ["node_modules"]
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  }
 }
